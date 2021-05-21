@@ -1,0 +1,9 @@
+{
+    "name": "woocommerce/reset",
+    "type": "wordpress-plugin",
+    "require-dev": {
+        "wp-phpunit/wp-phpunit": "^5.7",
+        "woocommerce/woocommerce-sniffs": "^0.1.0"
+    },
+    "license": "GPL-2.0-or-later"
+}
