@@ -14,6 +14,24 @@
 
 namespace Automattic\WooCommerce\Reset;
 
+/**
+ * Array of WP Options names used by WooCommerce.
+ *
+ * Presently, this is limited to options manged by WC Admin.
+ */
+const WOOCOMMERCE_OPTIONS = array(
+	'woocommerce_allow_tracking',
+	'woocommerce_onboarding_profile',
+	'woocommerce_task_list_welcome_modal_dismissed',
+	'woocommerce_task_list_tracked_completed_tasks',
+	'woocommerce_ces_tracks_queue',
+	'woocommerce_clear_ces_tracks_queue_for_page',
+	'wc_remote_inbox_notifications_stored_state',
+	'wc_remote_inbox_notifications_specs',
+	'wc_remote_inbox_notifications_wca_updated',
+	'woocommerce_admin_install_timestamp',
+);
+
 add_action(
 	'rest_api_init',
 	function () {
@@ -37,32 +55,14 @@ function handle_reset_route() {
 	 * Delete options, rather than reset them to another value. This allow their
 	 * default value to be assigned when the option is next retrieved by the site.
 	 */
-	delete_options();
+	delete_options( ...WOOCOMMERCE_OPTIONS );
 }
 
 /**
  * Delete WooCommerce options.
  *
- * Presently, this is limited to options manged by WC Admin.
+ * @param string ...$option_names Names of options to delete.
  */
-function delete_options() {
-	$options = array(
-		'woocommerce_allow_tracking',
-		'woocommerce_onboarding_profile',
-		'woocommerce_task_list_welcome_modal_dismissed',
-		'woocommerce_task_list_tracked_completed_tasks',
-		'woocommerce_ces_tracks_queue',
-		'woocommerce_clear_ces_tracks_queue_for_page',
-		'wc_remote_inbox_notifications_stored_state',
-		'wc_remote_inbox_notifications_specs',
-		'wc_remote_inbox_notifications_wca_updated',
-		'woocommerce_admin_install_timestamp',
-	);
-
-	array_walk(
-		$options,
-		function( $name ) {
-			delete_option( $name );
-		}
-	);
+function delete_options( string ...$option_names ) {
+	array_walk( $option_names, 'delete_option' );
 }

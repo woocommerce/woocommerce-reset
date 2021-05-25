@@ -13,32 +13,29 @@ namespace Automattic\WooCommerce\Reset;
 class DeleteOptionsTest extends \WP_UnitTestCase {
 
 	/**
-	 * Test test_delete_options with a data provider.
-	 *
-	 * @dataProvider get_woocommerce_admin_option_names
-	 * @param string $option_name Name of option from data provider.
+	 * Test deleting single option.
 	 */
-	public function test_delete_options( string $option_name ) {
-		delete_options();
+	public function test_delete_options_single() {
+		update_option( 'foo', 'testing' );
 
-		$this->assertFalse( get_option( $option_name ) );
+		delete_options( 'foo' );
+
+		$this->assertFalse( get_option( 'foo' ) );
 	}
 
 	/**
-	 * Return array of options managed by WooCommerce Admin.
+	 * Test deleting multiple options.
 	 */
-	public function get_woocommerce_admin_option_names() : array {
-		return array(
-			array( 'woocommerce_allow_tracking' ),
-			array( 'woocommerce_onboarding_profile' ),
-			array( 'woocommerce_task_list_welcome_modal_dismissed' ),
-			array( 'woocommerce_task_list_tracked_completed_tasks' ),
-			array( 'woocommerce_ces_tracks_queue' ),
-			array( 'woocommerce_clear_ces_tracks_queue_for_page' ),
-			array( 'wc_remote_inbox_notifications_stored_state' ),
-			array( 'wc_remote_inbox_notifications_specs' ),
-			array( 'wc_remote_inbox_notifications_wca_updated' ),
-			array( 'woocommerce_admin_install_timestamp' ),
-		);
+	public function test_delete_options_multi() {
+		update_option( 'foo', 'testing' );
+		update_option( 'bar', 'testing' );
+		update_option( 'baz', 'testing' );
+
+		delete_options( 'foo', 'bar', 'baz' );
+
+		$this->assertFalse( get_option( 'foo' ) );
+		$this->assertFalse( get_option( 'bar' ) );
+		$this->assertFalse( get_option( 'baz' ) );
 	}
+
 }
