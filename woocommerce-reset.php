@@ -37,10 +37,10 @@ add_action(
 	function () {
 		register_rest_route(
 			'woocommerce-reset/v1',
-			'/reset',
+			'/state',
 			array(
-				'methods'             => 'POST',
-				'callback'            => __NAMESPACE__ . '\\handle_reset_route',
+				'methods'             => 'DELETE',
+				'callback'            => __NAMESPACE__ . '\\handle_delete_state_route',
 				'permission_callback' => '__return_true',
 			)
 		);
@@ -48,9 +48,9 @@ add_action(
 );
 
 /**
- * Handle the POST woocommerce-reset/v1/reset route.
+ * Handle the DELETE woocommerce-reset/v1/state route.
  */
-function handle_reset_route() {
+function handle_delete_state_route() {
 	/*
 	 * Delete options, rather than reset them to another value. This allow their
 	 * default value to be assigned when the option is next retrieved by the site.
