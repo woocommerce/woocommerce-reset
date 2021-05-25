@@ -34,7 +34,6 @@ class RestTest extends \WP_UnitTestCase {
 		wp_set_current_user( 0 );
 
 		$request = new \WP_REST_Request( 'POST', '/woocommerce-reset/v1/reset' );
-		$request = new \WP_REST_Request( 'GET', '/wp/v2/posts' );
 
 		$response = $wp_rest_server->dispatch( $request );
 
