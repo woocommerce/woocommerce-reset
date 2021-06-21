@@ -1,0 +1,29 @@
+{
+  "name": "woocommerce-reset",
+  "version": "0.1.0",
+  "description": "A developer tool for WooCommerce provding REST API endpoints to reset WooCommerce data.",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "dependencies": {
+    "@wordpress/env": "^4.0.4"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "pretest": "npx wp-env start",
+    "test": "wp-env run phpunit 'phpunit -c /var/www/html/wp-content/plugins/woocommerce-reset/phpunit.xml.dist --verbose'",
+    "posttest": "npx wp-env stop",
+    "lint": "./vendor/bin/phpcs -v ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/woocommerce/woocommerce-reset.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/woocommerce/woocommerce-reset/issues"
+  },
+  "homepage": "https://github.com/woocommerce/woocommerce-reset#readme"
+}
