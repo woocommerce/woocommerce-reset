@@ -55,6 +55,7 @@ function handle_delete_state_route() {
 	 * Delete options, rather than reset them to another value. This allow their
 	 * default value to be assigned when the option is next retrieved by the site.
 	 */
+    error_log('reset');
 	delete_options( ...WOOCOMMERCE_OPTIONS );
 	delete_all_transients();
 }
