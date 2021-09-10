@@ -66,6 +66,15 @@ add_action(
 				'permission_callback' => '__return_true',
 			)
 		);
+        register_rest_route(
+			'woocommerce-reset/v1',
+			'/action-scheduler/run',
+			array(
+				'methods'             => 'POST',
+				'callback'            => __NAMESPACE__ . '\\run_action_scheduler',
+				'permission_callback' => '__return_true',
+			)
+		);
 
 	}
 );
@@ -117,4 +126,12 @@ function delete_all_transients() {
  */
 function run_cron() {
 	do_action( 'action_scheduler_run_queue', 'Async Request' );
+}
+/*
+ * Handle the POST woocommerce-reset/v1/action-scheduler/run route.
+ */
+function run_action_scheduler() {
+    if ( class_exists( 'ActionScheduler' ) ) {
+        ActionScheduler::runner()->run();
+    }
 }
