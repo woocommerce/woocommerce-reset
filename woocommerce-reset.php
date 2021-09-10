@@ -32,6 +32,11 @@ const WOOCOMMERCE_OPTIONS = array(
 	'woocommerce_admin_install_timestamp',
 );
 
+const WOOCOMMERCE_ADMIN_NOTE_TABLES = array(
+    'wc_admin_notes',
+    'wc_admin_note_actions',
+);
+
 add_action(
 	'rest_api_init',
 	function () {
@@ -46,10 +51,10 @@ add_action(
 		);
         register_rest_route(
 			'woocommerce-reset/v1',
-			'/truncate-table',
+			'/notes',
 			array(
 				'methods'             => 'DELETE',
-				'callback'            => __NAMESPACE__ . '\\truncate_table',
+				'callback'            => __NAMESPACE__ . '\\truncate_note_tables',
 				'permission_callback' => '__return_true',
 			)
 		);
@@ -69,13 +74,16 @@ function handle_delete_state_route() {
 	delete_all_transients();
 }
 
+
 /**
- * Handle the DELETE woocommerce-reset/v1/state route.
+ * Handle the DELETE woocommerce-reset/v1/notes route.
  */
-function truncate_table() {
+function truncate_note_tables() {
     global $wpdb;
-    $table  = $wpdb->prefix . 'table_name';
-    $delete = $wpdb->query("TRUNCATE TABLE wc_admin_notes");
+    foreach ( WOOCOMMERCE_ADMIN_NOTE_TABLES as noteTable ) {
+      $table  = $wpdb->prefix . noteTable;
+      $delete = $wpdb->query("TRUNCATE TABLE " . $table );
+    }
 }
 
 /**
