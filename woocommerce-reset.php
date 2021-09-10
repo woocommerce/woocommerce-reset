@@ -44,6 +44,16 @@ add_action(
 				'permission_callback' => '__return_true',
 			)
 		);
+        register_rest_route(
+			'woocommerce-reset/v1',
+			'/truncate-table',
+			array(
+				'methods'             => 'DELETE',
+				'callback'            => __NAMESPACE__ . '\\truncate_table',
+				'permission_callback' => '__return_true',
+			)
+		);
+
 	}
 );
 
@@ -55,9 +65,17 @@ function handle_delete_state_route() {
 	 * Delete options, rather than reset them to another value. This allow their
 	 * default value to be assigned when the option is next retrieved by the site.
 	 */
-    error_log('reset');
 	delete_options( ...WOOCOMMERCE_OPTIONS );
 	delete_all_transients();
+}
+
+/**
+ * Handle the DELETE woocommerce-reset/v1/state route.
+ */
+function truncate_table() {
+    global $wpdb;
+    $table  = $wpdb->prefix . 'table_name';
+    $delete = $wpdb->query("TRUNCATE TABLE wc_admin_notes");
 }
 
 /**
