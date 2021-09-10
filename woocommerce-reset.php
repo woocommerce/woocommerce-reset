@@ -67,6 +67,26 @@ add_action(
 				'permission_callback' => '__return_true',
 			)
 		);
+        register_rest_route(
+            'woocommerce-reset/v1',
+            '/cron/run',
+            array(
+                'methods'  => 'POST',
+                'callback' => __NAMESPACE__ . '\\run_cron_job',
+                'args'                => array(
+                    'hook'     => array(
+                        'description'       => 'Name of the cron that will be triggered.',
+                        'type'              => 'string',
+                        'sanitize_callback' => 'sanitize_text_field',
+                    ),
+                    'signature' => array(
+                        'description'       => 'Signature of the cron to trigger.',
+                        'type'              => 'string',
+                        'sanitize_callback' => 'sanitize_text_field',
+                    ),
+                ),
+            )
+        );
 
 	}
 );
@@ -120,4 +140,36 @@ function run_action_scheduler() {
     if ( class_exists( 'ActionScheduler' ) ) {
         ActionScheduler::runner()->run();
     }
+}
+
+function run_cron_job( $request ) {
+    $hook      = $request->get_param( 'hook' );
+    $signature = $request->get_param( 'signature' );
+
+    if ( ! isset( $hook ) || ! isset( $signature ) ) {
+        return;
+    }
+
+    $crons = _get_cron_array();
+    foreach ( $crons as $cron ) {
+        if ( isset( $cron[ $hook ][ $signature ] ) ) {
+            $args = $cron[ $hook ][ $signature ]['args'];
+            delete_transient( 'doing_cron' );
+            $scheduled = schedule_event( $hook, $args );
+
+            if ( false === $scheduled ) {
+                return $scheduled;
+            }
+
+            add_filter( 'cron_request', function( array $cron_request ) {
+                $cron_request['url'] = add_query_arg( 'run-cron', 1, $cron_request['url'] );
+                return $cron_request;
+            } );
+
+            spawn_cron();
+            sleep( 1 );
+            return true;
+        }
+    }
+    return false;
 }
