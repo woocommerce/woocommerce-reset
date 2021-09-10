@@ -58,6 +58,15 @@ add_action(
 				'permission_callback' => '__return_true',
 			)
 		);
+        register_rest_route(
+			'woocommerce-reset/v1',
+			'/action-scheduler/run',
+			array(
+				'methods'             => 'POST',
+				'callback'            => __NAMESPACE__ . '\\run_action_scheduler',
+				'permission_callback' => '__return_true',
+			)
+		);
 
 	}
 );
@@ -102,4 +111,13 @@ function delete_all_transients() {
 	global $wpdb;
 	$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\_transient\_%' " );
 	wp_cache_flush(); // Manually flush the cache after direct database call.
+}
+
+/*
+ * Handle the POST woocommerce-reset/v1/action-scheduler/run route.
+ */
+function run_action_scheduler() {
+    if ( class_exists( 'ActionScheduler' ) ) {
+        ActionScheduler::runner()->run();
+    }
 }
