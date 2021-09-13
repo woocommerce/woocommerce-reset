@@ -161,12 +161,7 @@ function get_cron_list() {
 
 	foreach ( $crons as $cron ) {
 		foreach ( $cron as $hook => $data ) {
-			foreach ( $data as $signature => $element ) {
-				$events[ $hook ] = (object) array(
-					'hook'      => $hook,
-					'signature' => $signature,
-				);
-			}
+            $events[] = $hook;
 		}
 	}
 	return $events;
@@ -174,16 +169,16 @@ function get_cron_list() {
 
 function run_cron_job( $request ) {
     $hook      = $request->get_param( 'hook' );
-    $signature = $request->get_param( 'signature' );
 
-    if ( ! isset( $hook ) || ! isset( $signature ) ) {
+    if ( ! isset( $hook ) ) {
         return;
     }
 
     $crons = _get_cron_array();
     foreach ( $crons as $cron ) {
-        if ( isset( $cron[ $hook ][ $signature ] ) ) {
-            $args = $cron[ $hook ][ $signature ]['args'];
+        if ( isset( $cron[ $hook ] ) ) {
+            $cron_signature = current($cron[ $hook ] );
+            $args = $cron_signature['args'];
             delete_transient( 'doing_cron' );
             $scheduled = schedule_event( $hook, $args );
 
