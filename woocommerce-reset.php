@@ -77,6 +77,14 @@ add_action(
 		);
         register_rest_route(
             'woocommerce-reset/v1',
+            'cron/list',
+            array(
+                'callback' => __NAMESPACE__ . '\\get_cron_list',
+                'methods' => 'GET',
+            )
+        );
+        register_rest_route(
+            'woocommerce-reset/v1',
             '/cron/run',
             array(
                 'methods'  => 'POST',
@@ -155,6 +163,27 @@ function run_action_scheduler() {
     if ( class_exists( 'ActionScheduler' ) ) {
         ActionScheduler::runner()->run();
     }
+}
+
+function get_cron_list() {
+	$crons  = _get_cron_array();
+	$events = array();
+
+	if ( empty( $crons ) ) {
+		return array();
+	}
+
+	foreach ( $crons as $cron ) {
+		foreach ( $cron as $hook => $data ) {
+			foreach ( $data as $signature => $element ) {
+				$events[ $hook ] = (object) array(
+					'hook'      => $hook,
+					'signature' => $signature,
+				);
+			}
+		}
+	}
+	return new WP_REST_Response( $events, 200 );
 }
 
 function run_cron_job( $request ) {
