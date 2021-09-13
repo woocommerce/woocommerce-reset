@@ -183,7 +183,7 @@ function get_cron_list() {
 			}
 		}
 	}
-	return new WP_REST_Response( $events, 200 );
+	return $events;
 }
 
 function run_cron_job( $request ) {
