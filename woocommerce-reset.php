@@ -109,9 +109,10 @@ function handle_delete_state_route() {
  */
 function truncate_note_tables() {
     global $wpdb;
-    foreach ( WOOCOMMERCE_ADMIN_NOTE_TABLES as noteTable ) {
-      $table  = $wpdb->prefix . noteTable;
-      $delete = $wpdb->query("TRUNCATE TABLE " . $table );
+    $note_tables = WOOCOMMERCE_ADMIN_NOTE_TABLES;
+    foreach( $note_tables as $note_table ) {
+        $table = $wpdb->prefix . $note_table;
+        $wpdb->query("TRUNCATE TABLE " . $table );
     }
 }
 
