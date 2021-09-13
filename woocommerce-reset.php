@@ -198,3 +198,21 @@ function run_cron_job( $request ) {
     }
     return false;
 }
+
+function schedule_event( $hook, $args = array() ) {
+	$event = (object) array(
+		'hook'      => $hook,
+		'timestamp' => 1,
+		'schedule'  => false,
+		'args'      => $args,
+	);
+	$crons = (array) _get_cron_array();
+	$key   = md5( serialize( $event->args ) );
+
+	$crons[ $event->timestamp ][ $event->hook ][ $key ] = array(
+		'schedule' => $event->schedule,
+		'args'     => $event->args,
+	);
+	uksort( $crons, 'strnatcasecmp' );
+	return _set_cron_array( $crons );
+}
