@@ -56,6 +56,7 @@ function handle_delete_state_route() {
 	 * default value to be assigned when the option is next retrieved by the site.
 	 */
 	delete_options( ...WOOCOMMERCE_OPTIONS );
+	delete_all_transients();
 }
 
 /**
@@ -65,4 +66,13 @@ function handle_delete_state_route() {
  */
 function delete_options( string ...$option_names ) {
 	array_walk( $option_names, 'delete_option' );
+}
+
+/**
+ * Deletes all transients stored in the database.
+ */
+function delete_all_transients() {
+	global $wpdb;
+	$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\_transient\_%' " );
+	wp_cache_flush(); // Manually flush the cache after direct database call.
 }
