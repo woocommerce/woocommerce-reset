@@ -87,11 +87,6 @@ add_action(
                         'type'              => 'string',
                         'sanitize_callback' => 'sanitize_text_field',
                     ),
-                    'signature' => array(
-                        'description'       => 'Signature of the cron to trigger.',
-                        'type'              => 'string',
-                        'sanitize_callback' => 'sanitize_text_field',
-                    ),
                 ),
             )
         );
@@ -109,6 +104,8 @@ function handle_delete_state_route() {
 	 */
 	delete_options( ...WOOCOMMERCE_OPTIONS );
 	delete_all_transients();
+    truncate_note_tables();
+    run_cron_job_by_hook( 'wc_admin_daily' );
 }
 
 
@@ -151,6 +148,9 @@ function run_action_scheduler() {
     }
 }
 
+/**
+ * Handle the GET woocommerce-reset/v1/cron/list route.
+ */
 function get_cron_list() {
 	$crons  = _get_cron_array();
 	$events = array();
@@ -167,9 +167,14 @@ function get_cron_list() {
 	return $events;
 }
 
+/**
+ * Handle the POST woocommerce-reset/v1/cron/run route.
+ */
 function run_cron_job( $request ) {
-    $hook      = $request->get_param( 'hook' );
+    run_cron_job_by_hook( $request->get_param( 'hook' ) );
+}
 
+function run_cron_job_by_hook( $hook ) {
     if ( ! isset( $hook ) ) {
         return;
     }
