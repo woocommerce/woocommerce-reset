@@ -50,4 +50,28 @@ class RestTest extends \WP_UnitTestCase {
 		$this->assertFalse( get_option( 'wc_remote_inbox_notifications_wca_updated' ) );
 		$this->assertFalse( get_option( 'woocommerce_admin_install_timestamp' ) );
 	}
+
+	/**
+	 * Test the reset endpoint deletes common woocommerce transients.
+	 */
+	public function test_reset_endpoint_deletes_woocommerce_transients() {
+		global $wp_rest_server;
+
+		$routes = $wp_rest_server->get_routes();
+
+		wp_set_current_user( 0 );
+
+		$request = new \WP_REST_Request( 'DELETE', '/woocommerce-reset/v1/state' );
+
+		$response = $wp_rest_server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$this->assertFalse( get_transient( 'wc_products_onsale' ) );
+		$this->assertFalse( get_transient( 'wc_featured_products' ) );
+		$this->assertFalse( get_transient( 'wc_outofstock_count' ) );
+		$this->assertFalse( get_transient( 'wc_low_stock_count' ) );
+		$this->assertFalse( get_transient( 'wc_count_comments' ) );
+		$this->assertFalse( get_transient( 'woocommerce_admin_remote_free_extensions_specs' ) );
+	}
 }
