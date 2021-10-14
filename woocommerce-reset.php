@@ -171,7 +171,7 @@ function delete_all_transients() {
 /**
  * Resets a particular settings_group.
  *
- * @param string $settings_group.
+ * @param string $settings_group Settings group.
  */
 function reset_settings( string $settings_group ) {
 	$request  = new \WP_REST_Request( 'GET', '/wc/v3/settings/' . $settings_group );
@@ -242,13 +242,18 @@ function get_cron_list() {
 
 /**
  * Handle the POST woocommerce-reset/v1/cron/run route.
- * 
- * @param array $request.
+ *
+ * @param array $request REST Request.
  */
 function run_cron_job( $request ) {
 	run_cron_job_by_hook( $request->get_param( 'hook' ) );
 }
 
+/**
+ * Runs a cron job by hook.
+ *
+ * @param string $hook Hook to run the cron job.
+ */
 function run_cron_job_by_hook( $hook ) {
 	if ( ! isset( $hook ) ) {
 		return;
@@ -282,12 +287,12 @@ function run_cron_job_by_hook( $hook ) {
 	return false;
 }
 
-/** 
+/**
  * Schedules event.
- * 
+ *
  * @param string $hook Hook for scheduling event.
- * @param array $args Arguments.
-*/
+ * @param array  $args Arguments.
+ */
 function schedule_event( $hook, $args = array() ) {
 	$event = (object) array(
 		'hook'      => $hook,
@@ -296,7 +301,7 @@ function schedule_event( $hook, $args = array() ) {
 		'args'      => $args,
 	);
 	$crons = (array) _get_cron_array();
-	$key   = md5( serialize( $event->args ) );
+	$key   = md5( serialize( $event->args ) ); // @codingStandardsIgnoreLine.
 
 	$crons[ $event->timestamp ][ $event->hook ][ $key ] = array(
 		'schedule' => $event->schedule,
