@@ -44,8 +44,8 @@ add_action(
 			'woocommerce-reset/v1',
 			'/state',
 			array(
-				'methods' => 'DELETE',
-				'callback' => __NAMESPACE__ . '\\handle_delete_state_route',
+				'methods'             => 'DELETE',
+				'callback'            => __NAMESPACE__ . '\\handle_delete_state_route',
 				'permission_callback' => '__return_true',
 			)
 		);
@@ -53,8 +53,8 @@ add_action(
 			'woocommerce-reset/v1',
 			'/notes',
 			array(
-				'methods' => 'DELETE',
-				'callback' => __NAMESPACE__ . '\\truncate_note_tables',
+				'methods'             => 'DELETE',
+				'callback'            => __NAMESPACE__ . '\\truncate_note_tables',
 				'permission_callback' => '__return_true',
 			)
 		);
@@ -62,8 +62,8 @@ add_action(
 			'woocommerce-reset/v1',
 			'/action-scheduler/run',
 			array(
-				'methods' => 'POST',
-				'callback' => __NAMESPACE__ . '\\run_action_scheduler',
+				'methods'             => 'POST',
+				'callback'            => __NAMESPACE__ . '\\run_action_scheduler',
 				'permission_callback' => '__return_true',
 			)
 		);
@@ -72,19 +72,19 @@ add_action(
 			'cron/list',
 			array(
 				'callback' => __NAMESPACE__ . '\\get_cron_list',
-				'methods' => 'GET',
+				'methods'  => 'GET',
 			)
 		);
 		register_rest_route(
 			'woocommerce-reset/v1',
 			'/cron/run',
 			array(
-				'methods' => 'POST',
+				'methods'  => 'POST',
 				'callback' => __NAMESPACE__ . '\\run_cron_job',
-				'args' => array(
+				'args'     => array(
 					'hook' => array(
-						'description' => 'Name of the cron that will be triggered.',
-						'type' => 'string',
+						'description'       => 'Name of the cron that will be triggered.',
+						'type'              => 'string',
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
@@ -97,29 +97,28 @@ add_action(
 /**
  * Handle the DELETE woocommerce-reset/v1/state route.
  */
-function handle_delete_state_route()
-{
+function handle_delete_state_route() {
 	/*
 	 * Delete options, rather than reset them to another value. This allow their
 	 * default value to be assigned when the option is next retrieved by the site.
 	 */
-	$options = delete_options(...WOOCOMMERCE_OPTIONS);
-	$transients = delete_all_transients();
-	$notes = truncate_note_tables();
-	$general_settings = reset_settings('general');
-	$products_settings = reset_settings('products');
-	$tax_settings = reset_settings('tax');
-	run_cron_job_by_hook('wc_admin_daily');
+	$options           = delete_options( ...WOOCOMMERCE_OPTIONS );
+	$transients        = delete_all_transients();
+	$notes             = truncate_note_tables();
+	$general_settings  = reset_settings( 'general' );
+	$products_settings = reset_settings( 'products' );
+	$tax_settings      = reset_settings( 'tax' );
+	run_cron_job_by_hook( 'wc_admin_daily' );
 
 	return array(
-		'options' => $options,
+		'options'    => $options,
 		'transients' => $transients,
-		'notes' => $notes,
-		'settings' => array(
-			'general' => $general_settings,
+		'notes'      => $notes,
+		'settings'   => array(
+			'general'  => $general_settings,
 			'products' => $products_settings,
-			'tax' => $tax_settings
-		)
+			'tax'      => $tax_settings,
+		),
 	);
 }
 
@@ -127,15 +126,14 @@ function handle_delete_state_route()
 /**
  * Handle the DELETE woocommerce-reset/v1/notes route.
  */
-function truncate_note_tables()
-{
+function truncate_note_tables() {
 	global $wpdb;
 	$note_tables = WOOCOMMERCE_ADMIN_NOTE_TABLES;
-	$success = true;
-	foreach ($note_tables as $note_table) {
-		$table = $wpdb->prefix . $note_table;
-		$result = $wpdb->query("TRUNCATE TABLE " . $table);
-		if ($success && ! $result ) {
+	$success     = true;
+	foreach ( $note_tables as $note_table ) {
+		$table  = $wpdb->prefix . $note_table;
+		$result = $wpdb->query( 'TRUNCATE TABLE ' . $table ); // @codingStandardsIgnoreLine.
+		if ( $success && ! $result ) {
 			$success = false;
 		}
 	}
@@ -148,63 +146,61 @@ function truncate_note_tables()
  * @param string ...$option_names Names of options to delete.
  * @return boolean on success or failure.
  */
-function delete_options(string ...$option_names)
-{
-	return array_walk($option_names, 'delete_option');
+function delete_options( string ...$option_names ) {
+	return array_walk( $option_names, 'delete_option' );
 }
 
 /**
  * Deletes all transients stored in the database.
  */
-function delete_all_transients()
-{
+function delete_all_transients() {
 	global $wpdb;
-	$wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '\_transient\_%' ");
+	$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\_transient\_%' " );
 	wp_cache_flush(); // Manually flush the cache after direct database call.
 	return $wpdb->rows_affected > 0;
 }
 
-/** 
+/**
  * Resets a particular settings_group.
-*/
-function reset_settings($settings_group)
-{
-	$request = new \WP_REST_Request('GET', '/wc/v3/settings/' . $settings_group);
-	$response = rest_do_request($request);
+ *
+ * @param string $settings_group.
+ */
+function reset_settings( string $settings_group ) {
+	$request  = new \WP_REST_Request( 'GET', '/wc/v3/settings/' . $settings_group );
+	$response = rest_do_request( $request );
 
-	if (is_wp_error($response)) {
+	if ( is_wp_error( $response ) ) {
 		return false;
 	}
 
-	$data = $response->get_data();
+	$data    = $response->get_data();
 	$success = true;
 
-	foreach ($data as $setting) {
+	foreach ( $data as $setting ) {
 		// The rest api doesn't allow selects to be set to ''.
-		if (($setting['type'] == 'select' && '' === $setting['default']) || $setting['default'] === $setting['value']) {
+		if ( ( 'select' === $setting['type'] && '' === $setting['default'] ) || $setting['default'] === $setting['value'] ) {
 			continue;
 		}
 
-		$request = new \WP_REST_Request('PUT', sprintf('/wc/v3/settings/%s/%s', $settings_group, $setting['id']));
+		$request = new \WP_REST_Request( 'PUT', sprintf( '/wc/v3/settings/%s/%s', $settings_group, $setting['id'] ) );
 		$request->set_body_params(
 			array(
 				'value' => $setting['default'],
 			)
 		);
-		$response = rest_do_request($request);
-		if ($success && 200 !== $response->status) {
+		$response = rest_do_request( $request );
+		if ( $success && 200 !== $response->status ) {
 			$success = false;
 		}
 	}
 	return $success;
 }
 
-/*
+/**
  * Handle the POST woocommerce-reset/v1/action-scheduler/run route.
  */
-function run_action_scheduler()
-{
-	if (class_exists('ActionScheduler')) {
+function run_action_scheduler() {
+	if ( class_exists( 'ActionScheduler' ) ) {
 		ActionScheduler::runner()->run();
 	}
 }
@@ -212,17 +208,16 @@ function run_action_scheduler()
 /**
  * Handle the GET woocommerce-reset/v1/cron/list route.
  */
-function get_cron_list()
-{
-	$crons = _get_cron_array();
+function get_cron_list() {
+	$crons  = _get_cron_array();
 	$events = array();
 
-	if (empty($crons)) {
+	if ( empty( $crons ) ) {
 		return array();
 	}
 
-	foreach ($crons as $cron) {
-		foreach ($cron as $hook => $data) {
+	foreach ( $crons as $cron ) {
+		foreach ( $cron as $hook => $data ) {
 			$events[] = $hook;
 		}
 	}
@@ -231,58 +226,66 @@ function get_cron_list()
 
 /**
  * Handle the POST woocommerce-reset/v1/cron/run route.
+ * 
+ * @param array $request.
  */
-function run_cron_job($request)
-{
-	run_cron_job_by_hook($request->get_param('hook'));
+function run_cron_job( $request ) {
+	run_cron_job_by_hook( $request->get_param( 'hook' ) );
 }
 
-function run_cron_job_by_hook($hook)
-{
-	if (!isset($hook)) {
+function run_cron_job_by_hook( $hook ) {
+	if ( ! isset( $hook ) ) {
 		return;
 	}
 
 	$crons = _get_cron_array();
-	foreach ($crons as $cron) {
-		if (isset($cron[$hook])) {
-			$cron_signature = current($cron[$hook]);
-			$args = $cron_signature['args'];
-			delete_transient('doing_cron');
-			$scheduled = schedule_event($hook, $args);
+	foreach ( $crons as $cron ) {
+		if ( isset( $cron[ $hook ] ) ) {
+			$cron_signature = current( $cron[ $hook ] );
+			$args           = $cron_signature['args'];
+			delete_transient( 'doing_cron' );
+			$scheduled = schedule_event( $hook, $args );
 
-			if (false === $scheduled) {
+			if ( false === $scheduled ) {
 				return $scheduled;
 			}
 
-			add_filter('cron_request', function (array $cron_request) {
-				$cron_request['url'] = add_query_arg('run-cron', 1, $cron_request['url']);
-				return $cron_request;
-			});
+			add_filter(
+				'cron_request',
+				function ( array $cron_request ) {
+					$cron_request['url'] = add_query_arg( 'run-cron', 1, $cron_request['url'] );
+					return $cron_request;
+				}
+			);
 
 			spawn_cron();
-			sleep(1);
+			sleep( 1 );
 			return true;
 		}
 	}
 	return false;
 }
 
-function schedule_event($hook, $args = array())
-{
-	$event = (object)array(
-		'hook' => $hook,
+/** 
+ * Schedules event.
+ * 
+ * @param string $hook Hook for scheduling event.
+ * @param array $args Arguments.
+*/
+function schedule_event( $hook, $args = array() ) {
+	$event = (object) array(
+		'hook'      => $hook,
 		'timestamp' => 1,
-		'schedule' => false,
-		'args' => $args,
+		'schedule'  => false,
+		'args'      => $args,
 	);
-	$crons = (array)_get_cron_array();
-	$key = md5(serialize($event->args));
+	$crons = (array) _get_cron_array();
+	$key   = md5( serialize( $event->args ) );
 
-	$crons[$event->timestamp][$event->hook][$key] = array(
+	$crons[ $event->timestamp ][ $event->hook ][ $key ] = array(
 		'schedule' => $event->schedule,
-		'args' => $event->args,
+		'args'     => $event->args,
 	);
-	uksort($crons, 'strnatcasecmp');
-	return _set_cron_array($crons);
+	uksort( $crons, 'strnatcasecmp' );
+	return _set_cron_array( $crons );
 }
