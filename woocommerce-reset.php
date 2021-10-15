@@ -85,6 +85,9 @@ function delete_all_transients() {
 	wp_cache_flush(); // Manually flush the cache after direct database call.
 }
 
+/** 
+ * Runs the action scheduler.
+ */
 function run_cron() {
 	do_action( 'action_scheduler_run_queue', 'Async Request' );
 }
