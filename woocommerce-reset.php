@@ -93,7 +93,7 @@ function get_installed_plugins() {
 
 function deactivate_and_delete_plugins( $skipped_plugins = array() ) {
 	$default_skipped = array( 'woocommerce', 'woocommerce-admin', 'woocommerce-reset', 'basic-auth' );
-	$skipped_plugins = array_merge( $skipped_plugins, $default_skipped )
+	$skipped_plugins = array_merge( $skipped_plugins, $default_skipped );
 	$installed_plugins = get_installed_plugins();
 	$to_be_deleted = array();
 	foreach ( $installed_plugins as $slug => $path ) {
