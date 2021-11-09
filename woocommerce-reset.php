@@ -323,8 +323,10 @@ function deactivate_and_delete_plugins( $skipped_plugins = array() ) {
 			$to_be_deleted[] = $path;
 		}
 	}
-	deactivate_plugins( $to_be_deleted );
-	delete_plugins( $to_be_deleted );
+	error_log( print_r( $installed_plugins ) );
+
+	// deactivate_plugins( $to_be_deleted );
+	// delete_plugins( $to_be_deleted );
 }
 
 /** 
