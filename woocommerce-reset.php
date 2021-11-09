@@ -122,15 +122,14 @@ function handle_delete_state_route( $request ) {
 	 * Delete options, rather than reset them to another value. This allow their
 	 * default value to be assigned when the option is next retrieved by the site.
 	 */
-
-	$skipped_plugin_slugs = $request->get_param( 'skipped_plugin_slugs' );
-	deactivate_and_delete_plugins( $skipped_plugin_slugs );
 	$options           = delete_options( ...WOOCOMMERCE_OPTIONS );
 	$transients        = delete_all_transients();
 	$notes             = truncate_note_tables();
 	$general_settings  = reset_settings( 'general' );
 	$products_settings = reset_settings( 'products' );
 	$tax_settings      = reset_settings( 'tax' );
+	$skipped_plugin_slugs = $request->has_param( 'skipped_plugin_slugs' ) ? $request->get_param( 'skipped_plugin_slugs' ) : array();
+	deactivate_and_delete_plugins( $skipped_plugin_slugs );
 	run_cron_job_by_hook( 'wc_admin_daily' );
 
 	return array(
@@ -312,7 +311,7 @@ function get_installed_plugins() {
 	return $installed_plugins;
 }
 
-function deactivate_and_delete_plugins( $skipped_plugins = array() ) {
+function deactivate_and_delete_plugins( $skipped_plugins ) {
 	$default_skipped = array( 'woocommerce', 'woocommerce-admin', 'woocommerce-reset', 'Basic-Auth' );
 	$skipped_plugins = array_merge( $skipped_plugins, $default_skipped );
 	$installed_plugins = get_installed_plugins();
@@ -323,11 +322,9 @@ function deactivate_and_delete_plugins( $skipped_plugins = array() ) {
 			$to_be_deleted[] = $path;
 		}
 	}
-	error_log( print_r( $skipped_plugins ) );
-	error_log( print_r( $to_be_deleted ) );
 
-	// deactivate_plugins( $to_be_deleted );
-	// delete_plugins( $to_be_deleted );
+	deactivate_plugins( $to_be_deleted );
+	delete_plugins( $to_be_deleted );
 }
 
 /** 
