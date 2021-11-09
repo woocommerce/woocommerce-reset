@@ -42,22 +42,44 @@ add_action(
 				'methods'             => 'DELETE',
 				'callback'            => __NAMESPACE__ . '\\handle_delete_state_route',
 				'permission_callback' => '__return_true',
+				'args'                => get_params(),
 			)
 		);
 	}
 );
 
 /**
+	 * Get the query params for collections.
+	 *
+	 * @return array
+	 */
+function get_params() {
+	$params            = array();
+	$params['skipped_plugin_slugs'] = array(
+		'description'       => __( 'Plugin slugs to be skipped.', 'woocommerce-admin' ),
+		'type'              => 'array',
+		'sanitize_callback' => 'wp_parse_slug_list',
+		'validate_callback' => 'rest_validate_request_arg',
+		'items'             => array(
+			'type' => 'string',
+		),
+	);
+	return $params;
+}
+
+/**
  * Handle the DELETE woocommerce-reset/v1/state route.
  */
-function handle_delete_state_route() {
+function handle_delete_state_route( $request ) {
 	/*
 	 * Delete options, rather than reset them to another value. This allow their
 	 * default value to be assigned when the option is next retrieved by the site.
 	 */
-	# delete_options( ...WOOCOMMERCE_OPTIONS );
-	# delete_all_transients();
-	deactivate_and_delete_plugins();
+
+	delete_options( ...WOOCOMMERCE_OPTIONS );
+	delete_all_transients();
+	$skipped_plugin_slugs = $request->get_param( 'skipped_plugin_slugs' );
+	deactivate_and_delete_plugins( $skipped_plugin_slugs );
 }
 
 /**
@@ -92,7 +114,7 @@ function get_installed_plugins() {
 }
 
 function deactivate_and_delete_plugins( $skipped_plugins = array() ) {
-	$default_skipped = array( 'woocommerce', 'woocommerce-admin', 'woocommerce-reset', 'basic-auth' );
+	$default_skipped = array( 'woocommerce', 'woocommerce-admin', 'woocommerce-reset', 'Basic-Auth' );
 	$skipped_plugins = array_merge( $skipped_plugins, $default_skipped );
 	$installed_plugins = get_installed_plugins();
 	$to_be_deleted = array();
@@ -102,8 +124,6 @@ function deactivate_and_delete_plugins( $skipped_plugins = array() ) {
 			$to_be_deleted[] = $path;
 		}
 	}
-	error_log( print_r( array_keys( $installed_plugins ) ) );
-	error_log( print_r( $to_be_deleted ) );
-	# deactivate_plugins( $to_be_deleted );
-	# delete_plugins( $to_be_deleted );
+	deactivate_plugins( $to_be_deleted );
+	delete_plugins( $to_be_deleted );
 }
