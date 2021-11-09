@@ -45,6 +45,14 @@ add_action(
 				'args'                => get_params(),
 			)
 		);
+		register_rest_route(
+			'woocommerce-reset/v1',
+			'cron/run',
+			array(
+				'callback' => __NAMESPACE__ . '\\run_cron',
+				'methods'  => 'POST',
+			)
+		);
 	}
 );
 
@@ -126,4 +134,11 @@ function deactivate_and_delete_plugins( $skipped_plugins = array() ) {
 	}
 	deactivate_plugins( $to_be_deleted );
 	delete_plugins( $to_be_deleted );
+}
+
+/** 
+ * Runs the action scheduler.
+ */
+function run_cron() {
+	do_action( 'action_scheduler_run_queue', 'Async Request' );
 }
