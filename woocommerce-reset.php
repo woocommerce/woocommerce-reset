@@ -55,8 +55,8 @@ function handle_delete_state_route() {
 	 * Delete options, rather than reset them to another value. This allow their
 	 * default value to be assigned when the option is next retrieved by the site.
 	 */
-	delete_options( ...WOOCOMMERCE_OPTIONS );
-	delete_all_transients();
+	# delete_options( ...WOOCOMMERCE_OPTIONS );
+	# delete_all_transients();
 	deactivate_and_delete_plugins();
 }
 
@@ -96,11 +96,14 @@ function deactivate_and_delete_plugins( $skipped_plugins = array() ) {
 	$skipped_plugins = array_merge( $skipped_plugins, $default_skipped );
 	$installed_plugins = get_installed_plugins();
 	$to_be_deleted = array();
+
 	foreach ( $installed_plugins as $slug => $path ) {
-		if ( ! in_array( $slug, $skip ) ) {
+		if ( ! in_array( $slug, $skipped_plugins ) ) {
 			$to_be_deleted[] = $path;
 		}
 	}
-	deactivate_plugins( $to_be_deleted );
-	delete_plugins( $to_be_deleted );
+	error_log( print_r( array_keys( $installed_plugins ) ) );
+	error_log( print_r( $to_be_deleted ) );
+	# deactivate_plugins( $to_be_deleted );
+	# delete_plugins( $to_be_deleted );
 }
