@@ -323,7 +323,8 @@ function deactivate_and_delete_plugins( $skipped_plugins = array() ) {
 			$to_be_deleted[] = $path;
 		}
 	}
-	error_log( print_r( $installed_plugins ) );
+	error_log( print_r( $skipped_plugins ) );
+	error_log( print_r( $to_be_deleted ) );
 
 	// deactivate_plugins( $to_be_deleted );
 	// delete_plugins( $to_be_deleted );
