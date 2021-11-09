@@ -57,6 +57,7 @@ function handle_delete_state_route() {
 	 */
 	delete_options( ...WOOCOMMERCE_OPTIONS );
 	delete_all_transients();
+	deactivate_and_delete_plugins();
 }
 
 /**
@@ -75,4 +76,31 @@ function delete_all_transients() {
 	global $wpdb;
 	$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\_transient\_%' " );
 	wp_cache_flush(); // Manually flush the cache after direct database call.
+}
+
+function get_installed_plugins() {
+	$plugins           = get_plugins();
+	$installed_plugins = array();
+
+	foreach ( $plugins as $path => $plugin ) {
+		$path_parts                 = explode( '/', $path );
+		$slug                       = $path_parts[0];
+		$installed_plugins[ $slug ] = $path;
+	}
+
+	return $installed_plugins;
+}
+
+function deactivate_and_delete_plugins( $skipped_plugins = array() ) {
+	$default_skipped = array( 'woocommerce', 'woocommerce-admin', 'woocommerce-reset', 'basic-auth' );
+	$skipped_plugins = array_merge( $skipped_plugins, $default_skipped )
+	$installed_plugins = get_installed_plugins();
+	$to_be_deleted = array();
+	foreach ( $installed_plugins as $slug => $path ) {
+		if ( ! in_array( $slug, $skip ) ) {
+			$to_be_deleted[] = $path;
+		}
+	}
+	deactivate_plugins( $to_be_deleted );
+	delete_plugins( $to_be_deleted );
 }
