@@ -44,6 +44,14 @@ add_action(
 				'permission_callback' => '__return_true',
 			)
 		);
+		register_rest_route(
+			'woocommerce-reset/v1',
+			'cron/run',
+			array(
+				'callback' => __NAMESPACE__ . '\\run_cron',
+				'methods'  => 'POST',
+			)
+		);
 	}
 );
 
@@ -75,4 +83,11 @@ function delete_all_transients() {
 	global $wpdb;
 	$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\_transient\_%' " );
 	wp_cache_flush(); // Manually flush the cache after direct database call.
+}
+
+/** 
+ * Runs the action scheduler.
+ */
+function run_cron() {
+	do_action( 'action_scheduler_run_queue', 'Async Request' );
 }
