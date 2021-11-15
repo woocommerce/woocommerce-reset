@@ -90,20 +90,21 @@ function handle_delete_state_route( $request ) {
 	 * default value to be assigned when the option is next retrieved by the site.
 	 */
 	$options              = delete_options( ...WOOCOMMERCE_OPTIONS );
-	$skipped_plugin_slugs =  $request->has_param( 'skipped_plugin_slugs' ) ? $request->get_param( 'skipped_plugin_slugs' ) : array();
-	deactivate_and_delete_plugins( $skipped_plugin_slugs );
-	$transients        = delete_all_transients();
-	$notes             = truncate_note_tables();
-	$general_settings  = reset_settings( 'general' );
-	$products_settings = reset_settings( 'products' );
-	$tax_settings      = reset_settings( 'tax' );
+	$skipped_plugin_slugs = $request->has_param( 'skipped_plugin_slugs' ) ? $request->get_param( 'skipped_plugin_slugs' ) : array();
+	$delete_plugins       = deactivate_and_delete_plugins( $skipped_plugin_slugs );
+	$transients           = delete_all_transients();
+	$notes                = truncate_note_tables();
+	$general_settings     = reset_settings( 'general' );
+	$products_settings    = reset_settings( 'products' );
+	$tax_settings         = reset_settings( 'tax' );
 	run_cron_job_by_hook( 'wc_admin_daily' );
 
 	return array(
-		'options'    => $options,
-		'transients' => $transients,
-		'notes'      => $notes,
-		'settings'   => array(
+		'options'        => $options,
+		'transients'     => $transients,
+		'delete_plugins' => $delete_plugins,
+		'notes'          => $notes,
+		'settings'       => array(
 			'general'  => $general_settings,
 			'products' => $products_settings,
 			'tax'      => $tax_settings,
@@ -291,5 +292,5 @@ function deactivate_and_delete_plugins( $skipped_plugins ) {
 		}
 	}
 	deactivate_plugins( $to_be_deleted );
-	delete_plugins( $to_be_deleted );
+	return delete_plugins( $to_be_deleted );
 }
