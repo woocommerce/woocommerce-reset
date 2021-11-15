@@ -55,42 +55,9 @@ add_action(
 			array(
 				'callback' => __NAMESPACE__ . '\\run_cron',
 				'methods'  => 'POST',
-			)
-		);
-        register_rest_route(
-			'woocommerce-reset/v1',
-			'/notes',
-			array(
-				'methods'             => 'DELETE',
-				'callback'            => __NAMESPACE__ . '\\truncate_note_tables',
 				'permission_callback' => '__return_true',
 			)
 		);
-		register_rest_route(
-			'woocommerce-reset/v1',
-			'/action-scheduler/run',
-			array(
-				'methods'             => 'POST',
-				'callback'            => __NAMESPACE__ . '\\run_action_scheduler',
-				'permission_callback' => '__return_true',
-			)
-		);
-		register_rest_route(
-			'woocommerce-reset/v1',
-			'/cron/run',
-			array(
-				'methods'  => 'POST',
-				'callback' => __NAMESPACE__ . '\\run_cron_job',
-				'args'     => array(
-					'hook' => array(
-						'description'       => 'Name of the cron that will be triggered.',
-						'type'              => 'string',
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-				),
-			)
-		);
-
 	}
 );
 
@@ -201,16 +168,6 @@ function reset_settings( string $settings_group ) {
  */
 function run_cron() {
 	do_action( 'action_scheduler_run_queue', 'Async Request' );
-}
-
-/*
-/**
- * Handle the POST woocommerce-reset/v1/action-scheduler/run route.
- */
-function run_action_scheduler() {
-	if ( class_exists( 'ActionScheduler' ) ) {
-		ActionScheduler::runner()->run();
-	}
 }
 
 /**
