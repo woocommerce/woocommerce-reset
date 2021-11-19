@@ -281,6 +281,9 @@ function deactivate_and_delete_plugins( $skipped_plugins ) {
 	if ( ! function_exists( 'get_plugins' ) ) {
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 	}
+	if ( ! function_exists( 'request_filesystem_credentials' ) ) {
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+	}
 	$default_skipped = array( 'woocommerce', 'woocommerce-admin', 'woocommerce-reset', 'Basic-Auth' );
 	$skipped_plugins = array_merge( $skipped_plugins, $default_skipped );
 	$installed_plugins = get_installed_plugins();
