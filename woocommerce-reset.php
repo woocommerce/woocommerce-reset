@@ -51,6 +51,25 @@ add_action(
 		);
 		register_rest_route(
 			'woocommerce-reset/v1',
+			'/switch-language',
+			array(
+				'methods'             => 'POST',
+				'callback'            => __NAMESPACE__ . '\\switch_language',
+				'permission_callback' => '__return_true',
+				'args' => array(
+					'lang' => array(
+						'type' => 'string',
+						'required' => true,
+						'enum' => array(
+							'es_ES',
+							'en_US'
+						)
+					)
+				)
+			)
+		);
+		register_rest_route(
+			'woocommerce-reset/v1',
 			'cron/run',
 			array(
 				'callback' => __NAMESPACE__ . '\\run_cron',
@@ -163,7 +182,7 @@ function reset_settings( string $settings_group ) {
 	return $success;
 }
 
-/** 
+/**
  * Runs the action scheduler.
  */
 function run_cron() {
@@ -239,4 +258,36 @@ function schedule_event( $hook, $args = array() ) {
 	);
 	uksort( $crons, 'strnatcasecmp' );
 	return _set_cron_array( $crons );
+}
+
+/**
+ * Switch site language.
+ *
+ * @param $request
+ * @return void
+ */
+function switch_language($request) {
+	$lang = $request->get_param( 'lang' );
+	if ( $lang !== 'en_US' ) {
+		$wp_lang_dir = ABSPATH . '/wp-content/languages';
+
+		$core_lang = $lang . '.mo';
+		$admin_lang = 'admin-' . $lang . '.mo';
+		$plugin_lang = 'woocommerce-es_ES.mo';
+
+		if ( ! is_dir( $wp_lang_dir ) ) {
+			mkdir( $wp_lang_dir );
+		}
+
+		if ( ! is_dir( $wp_lang_dir . '/plugins') ) {
+			mkdir( $wp_lang_dir . '/plugins' );
+		}
+
+		copy( __DIR__ . '/languages/' . $core_lang, $wp_lang_dir . '/' . $core_lang );
+		copy( __DIR__ . '/languages/' . $admin_lang, $wp_lang_dir . '/' . $admin_lang );
+		copy( __DIR__ . '/languages/' . $plugin_lang, $wp_lang_dir . '/plugins/' . $plugin_lang );
+	}
+
+	delete_option('WPLANG');
+	return add_option('WPLANG', $lang);
 }
