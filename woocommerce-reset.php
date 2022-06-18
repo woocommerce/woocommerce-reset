@@ -274,7 +274,7 @@ function switch_language($request) {
 		$core_lang = $lang . '.mo';
 		$admin_lang = 'admin-' . $lang . '.mo';
 		$plugin_lang = 'woocommerce-es_ES.mo';
-		$wc_admin_app_lang = 'wocommerce-es_ES-wc-admin-app.json';
+		$wc_admin_app_lang = 'woocommerce-es_ES-wc-admin-app.json';
 
 		if ( ! is_dir( $wp_lang_dir ) ) {
 			mkdir( $wp_lang_dir );
@@ -287,7 +287,7 @@ function switch_language($request) {
 		copy( __DIR__ . '/languages/' . $core_lang, $wp_lang_dir . '/' . $core_lang );
 		copy( __DIR__ . '/languages/' . $admin_lang, $wp_lang_dir . '/' . $admin_lang );
 		copy( __DIR__ . '/languages/' . $plugin_lang, $wp_lang_dir . '/plugins/' . $plugin_lang );
-		copy( __DIR__ . '/languages/' . $plugin_lang, $wp_lang_dir . '/plugins/' . $wc_admin_app_lang );
+		copy( __DIR__ . '/languages/' . $wc_admin_app_lang, $wp_lang_dir . '/plugins/' . $wc_admin_app_lang );
 	}
 
 	delete_option('WPLANG');
