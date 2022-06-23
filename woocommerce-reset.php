@@ -30,6 +30,10 @@ const WOOCOMMERCE_OPTIONS = array(
 	'wc_remote_inbox_notifications_specs',
 	'wc_remote_inbox_notifications_wca_updated',
 	'woocommerce_admin_install_timestamp',
+	'woocommerce_store_address',
+	'woocommerce_store_address_2',
+	'woocommerce_store_city',
+	'woocommerce_store_postcode',
 );
 
 const WOOCOMMERCE_ADMIN_NOTE_TABLES = array(
